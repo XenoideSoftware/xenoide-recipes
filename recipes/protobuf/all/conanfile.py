@@ -172,8 +172,9 @@ class ProtobufConan(ConanFile):
                 keep_path=False,
             )
 
-        # Runtime + protoc on Windows.
-        for pattern in ("*.dll", "protoc.exe", "protoc"):
+        # Runtime + protoc. Upstream installs `protoc` as a symlink to
+        # `protoc-<version>`; both must be copied or the symlink dangles.
+        for pattern in ("*.dll", "protoc.exe", "protoc", "protoc-*"):
             copy(
                 self,
                 pattern=pattern,
@@ -205,7 +206,9 @@ class ProtobufConan(ConanFile):
         libprotobuf = self.cpp_info.components["libprotobuf"]
         libprotobuf.set_property("cmake_target_name", "protobuf::libprotobuf")
         libprotobuf.set_property("cmake_build_modules", [build_module])
-        libprotobuf.libs = ["libprotobuf"] if self._is_msvc else ["protobuf"]
+        suffix = "d" if str(self.settings.build_type) == "Debug" else ""
+        libprotobuf.libs = ([f"libprotobuf{suffix}"] if self._is_msvc
+                            else [f"protobuf{suffix}"])
         libprotobuf.includedirs = ["include"]
         if self.settings.os in ("Linux", "FreeBSD"):
             libprotobuf.system_libs = ["pthread"]

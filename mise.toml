@@ -4,7 +4,7 @@
 
 [env]
 DEVKIT_URL = "https://github.com/XenoideSoftware/devkit.git"
-DEVKIT_REF = "v0.1.0"
+DEVKIT_REF = "v0.1.1"
 RECIPES_REF = ""
 XENOIDE_PACKAGES = ""
 CONAN_HOME = "{{ env.XENOIDE_CONAN_HOME | default(value=config_root ~ '/.conan2') }}"
@@ -13,7 +13,7 @@ XENOIDE_BUILD_ROOT = "{{ env.XENOIDE_BUILD_ROOT | default(value='build') }}"
 [tools]
 cmake = "3.31.6"
 ninja = "1.12.1"
-python = "3.12.8"
+python = "3.12.16"
 "pipx:conan" = "2.27.0"
 
 [task_config]

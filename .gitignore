@@ -13,3 +13,9 @@ Testing/
 *.profdata
 __pycache__/
 *.pyc
+
+# Xenoide devkit
+/.devkit
+/.deps
+/.conan2
+/.xenoide

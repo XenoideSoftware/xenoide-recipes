@@ -3,7 +3,7 @@ from os.path import join
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import collect_libs, copy, get
 
 
 class LspFrameworkConanfile(ConanFile):
@@ -20,6 +20,11 @@ class LspFrameworkConanfile(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def configure(self):
+        # The framework requires C++20 (concepts); do not inherit the devkit's
+        # C++17 default for this package.
+        self.settings.compiler.cppstd = "20"
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -50,7 +55,9 @@ class LspFrameworkConanfile(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = ["include"]
         self.cpp_info.libdirs = ["lib"]
-        self.cpp_info.libs = ["lsp"]
+        # Debug builds produce `lspd`; collect_libs finds whatever the build
+        # actually installed instead of hard-coding the Release name.
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.set_property("cmake_target_name", "lsp::liblsp")
         self.cpp_info.set_property("cmake_file_name", "lsp")
 

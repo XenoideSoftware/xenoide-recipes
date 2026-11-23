@@ -57,17 +57,30 @@ def main():
     configs = args.config or ["gcc-release"]
 
     recipes = Path("recipes")
+    if not DEVKIT.is_dir():
+        raise SystemExit(".devkit/ is missing; run `mise run devkit:sync` first")
+    result = subprocess.run(
+        ["conan", "remote", "add", "xenoide-recipes", str(Path.cwd().resolve()),
+         "--type=local-recipes-index", "--index", "0", "--force"])
+    if result.returncode != 0:
+        raise SystemExit("could not register the local recipes remote")
     failures = []
     for recipe_dir in sorted(p for p in recipes.iterdir() if p.is_dir()):
         versions = recipe_versions(recipe_dir)
         if not versions:
             continue
+        # Recipes live in recipes/<name>/all; `conan create recipes/<name>`
+        # has no conanfile and always failed.
+        conanfile_dir = recipe_dir / "all"
+        if not (conanfile_dir / "conanfile.py").is_file():
+            print(f"warning: {recipe_dir.name} has no all/conanfile.py; skipping")
+            continue
         for version in versions:
             for config in configs:
                 print(f"==> {recipe_dir.name}/{version} [{config}]")
                 result = subprocess.run(
-                    ["conan", "create", str(recipe_dir), "--version", version,
-                     *profile_args(config)])
+                    ["conan", "create", str(conanfile_dir), "--version", version,
+                     *profile_args(config), "--build=missing"])
                 if result.returncode != 0:
                     failures.append(f"{recipe_dir.name}/{version} [{config}]")
     if failures:

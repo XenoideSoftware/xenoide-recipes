@@ -9,20 +9,27 @@
 # This file is shipped under <pkg>/lib/cmake/protobuf/ and is auto-loaded
 # by CMakeDeps via cpp_info.cmake_build_modules.
 
-if(NOT DEFINED protobuf_PROTOC_EXECUTABLE)
-    if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-        set(_protobuf_protoc_name "protoc.exe")
-    else()
-        set(_protobuf_protoc_name "protoc")
-    endif()
-
-    # CMAKE_CURRENT_LIST_DIR == <pkg>/lib/cmake/protobuf
-    set(protobuf_PROTOC_EXECUTABLE
-        "${CMAKE_CURRENT_LIST_DIR}/../../../bin/${_protobuf_protoc_name}"
-        CACHE FILEPATH "Path to the protoc binary"
-    )
-    unset(_protobuf_protoc_name)
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set(_protobuf_protoc_name "protoc.exe")
+else()
+    set(_protobuf_protoc_name "protoc")
 endif()
+
+# CMAKE_CURRENT_LIST_DIR == <pkg>/lib/cmake/protobuf
+set(_protobuf_protoc_default
+    "${CMAKE_CURRENT_LIST_DIR}/../../../bin/${_protobuf_protoc_name}")
+
+# A cached path can dangle after the Conan package folder changes (the cache
+# key survives a reconfigure). Recompute whenever it is missing or stale.
+if(NOT DEFINED protobuf_PROTOC_EXECUTABLE
+   OR NOT EXISTS "${protobuf_PROTOC_EXECUTABLE}")
+    set(protobuf_PROTOC_EXECUTABLE
+        "${_protobuf_protoc_default}"
+        CACHE FILEPATH "Path to the protoc binary" FORCE
+    )
+endif()
+unset(_protobuf_protoc_name)
+unset(_protobuf_protoc_default)
 
 if(NOT COMMAND protobuf_generate_cpp)
     function(protobuf_generate_cpp SRCS HDRS)

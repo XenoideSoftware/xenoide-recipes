@@ -1,0 +1,36 @@
+# Recipe repository: it is consumed through a local-recipes-index remote, so
+# there is no application conanfile here. The devkit is pinned for the shared
+# tooling and conventions.
+
+[env]
+DEVKIT_URL = "https://github.com/XenoideSoftware/devkit.git"
+DEVKIT_REF = "v0.1.0"
+RECIPES_REF = ""
+XENOIDE_PACKAGES = ""
+CONAN_HOME = "{{ env.XENOIDE_CONAN_HOME | default(value=config_root ~ '/.conan2') }}"
+XENOIDE_BUILD_ROOT = "{{ env.XENOIDE_BUILD_ROOT | default(value='build') }}"
+
+[tools]
+cmake = "3.31.6"
+ninja = "1.12.1"
+python = "3.12.8"
+"pipx:conan" = "2.27.0"
+
+[task_config]
+includes = [".devkit/mise/tasks"]
+
+[tasks."devkit:sync"]
+description = "Check out (or link) the pinned devkit"
+run = "python mise/bootstrap.py sync"
+
+[tasks.setup]
+description = "Bootstrap the devkit"
+depends = ["devkit:sync"]
+run = "python mise/bootstrap.py setup"
+
+[tasks."recipes:test"]
+description = "Build every recipe test_package for the selected config(s)"
+usage = '''
+flag "--config <config>" help="gcc-release, gcc-debug, clang-release or msvc-release" default="gcc-release"
+'''
+run = 'python mise/recipes_test.py --config "{{usage.config}}"'

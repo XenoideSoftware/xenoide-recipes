@@ -1,0 +1,7 @@
+versions:
+  "chromium_6943":
+    folder: all
+  "chromium_6834":
+    folder: all
+  "chromium_6709":
+    folder: all

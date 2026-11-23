@@ -1,0 +1,15 @@
+
+# Build, analysis and generated artifacts
+build/
+build-*/
+coverage/
+mutation/
+CMakeUserPresets.json
+compile_commands.json
+Testing/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+__pycache__/
+*.pyc
